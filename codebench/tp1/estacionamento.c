@@ -6,6 +6,7 @@
 #define MAX_VAGA 1024
 #define HORA 60
 #define PLACA 15
+#define VALOR_MINUTO 0.05
 
 typedef struct cliente Cliente;
 typedef struct vaga Vaga;
@@ -22,6 +23,7 @@ struct cliente{
 struct vaga{
     int numero;
     char classe;
+    float tempoOcupado;
     Cliente *cliente;
     int altura;
     Vaga *esquerda;
@@ -30,7 +32,7 @@ struct vaga{
 };
 
 Vaga* criaEstacionamento();
-Vaga* criaVaga(int numero, char classe, Cliente *cliente);
+Vaga* criaVaga(int numero, char classe, float tempoOcupado, Cliente *cliente);
 Cliente* criaCliente(char *placa, int entrada, int saida);
 Vaga* insereEstacionamento(Vaga *estacionamento, Vaga *vaga);
 Vaga* removeVaga(Vaga **estacionamento, Vaga *vaga);
@@ -84,13 +86,13 @@ int main(){
                 vagaProcurada = buscaVaga(estacionamento, numero);
                 
                 if(vagaProcurada == NULL || (vagaProcurada != NULL && vagaProcurada->numero != numero)){
-                    estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(), criaCliente(geraPlaca(), geraTempo(), 0)));
+                    estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(), 0, criaCliente(geraPlaca(), geraTempo(), 0)));
                 
                 }
                 
             }else{
                 ehRaiz = 0;
-                estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(), criaCliente(geraPlaca(), geraTempo(), 0)));
+                estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(), 0, criaCliente(geraPlaca(), geraTempo(), 0)));
                 
             }
 
@@ -113,7 +115,7 @@ int main(){
                 vagaProcurada = buscaVagaRemocao(estacionamento, vaga);
                 vagaProcurada = finalizaVaga(vagaProcurada);
 
-                if(vagaProcurada != NULL){
+                /*if(vagaProcurada != NULL){
                     if(vaga == vagaProcurada->numero){
                         printf("vaga encontrada = %d\n", vagaProcurada->numero);
 
@@ -121,9 +123,9 @@ int main(){
                         printf("vaga nao encontrada, removido a vaga %d que era a anterior\n", vagaProcurada->numero);
             
                 }else
-                    printf("estacionamento vazio, nao foi possivel remover nenhuma vaga\n");
+                    printf("estacionamento vazio, nao foi possivel remover nenhuma vaga\n");*/
 
-                saida = insereEstacionamento(saida, criaVaga(vagaProcurada->numero, vagaProcurada->classe, criaCliente(vagaProcurada->cliente->placa, vagaProcurada->cliente->horaEntrada * 60 + vagaProcurada->cliente->minutoEntrada, vagaProcurada->cliente->horaSaida * 60 + vagaProcurada->cliente->minutoSaida)));
+                saida = insereEstacionamento(saida, criaVaga(vagaProcurada->numero, vagaProcurada->classe, vagaProcurada->tempoOcupado, criaCliente(vagaProcurada->cliente->placa, vagaProcurada->cliente->horaEntrada * 60 + vagaProcurada->cliente->minutoEntrada, vagaProcurada->cliente->horaSaida * 60 + vagaProcurada->cliente->minutoSaida)));
                 removeVaga(&estacionamento, vagaProcurada);
 
             }
@@ -149,7 +151,7 @@ int main(){
         vagasPorClasse(saida, qtdeVagasClasse);
 
         printf("\n---------------Relatorio--------------------------\n");
-        printf("Media de vagas ocupadas: %d\n", vagasSaida);
+        printf("\nMedia de vagas ocupadas: %d\n", vagasSaida);
         printf("     Classe A (moto): %d vaga(s)\n", qtdeVagasClasse[0]);
         printf("     Classe B (normal): %d vaga(s)\n", qtdeVagasClasse[1]);
         printf("     Classe C (VIP): %d vaga(s)\n", qtdeVagasClasse[2]);
@@ -183,11 +185,12 @@ Vaga* criaEstacionamento(){
 
 }
 
-Vaga* criaVaga(int numero, char classe, Cliente *cliente){
+Vaga* criaVaga(int numero, char classe, float tempoOcupado, Cliente *cliente){
     Vaga *vaga = malloc(sizeof *vaga);
 
     vaga->numero = numero;
     vaga->classe = classe;
+    vaga->tempoOcupado = tempoOcupado;
     vaga->cliente = cliente;
     vaga->esquerda = NULL;
     vaga->direita = NULL;
@@ -347,6 +350,9 @@ Vaga* finalizaVaga(Vaga* estacionamento){
         estacionamento->cliente->horaSaida = saida / 60;
         estacionamento->cliente->minutoSaida = saida % 60;
 
+        estacionamento->tempoOcupado = saida - ((estacionamento->cliente->horaEntrada * 60) + estacionamento->cliente->minutoEntrada);
+        printf("tempoOcupado = %.2f\n", estacionamento->tempoOcupado);
+
     }
 
     return estacionamento;
@@ -453,9 +459,10 @@ Vaga* rotacaoEsquerdaDireita(Vaga **estacionamento){
 
 void imprime(Vaga *estacionamento){
     if(estacionamento != NULL){
-        printf("Placa: %s\n", estacionamento->cliente->placa);
+        printf("\nPlaca: %s\n", estacionamento->cliente->placa);
         printf("\tPiso: %d Vaga: %d Classe = %c Numero = %d\n", estacionamento->numero / 128, estacionamento->numero % 128, estacionamento->classe, estacionamento->numero);
         printf("\tEntrada: %dh %dmin Saida: %dh %dmin\n", estacionamento->cliente->horaEntrada, estacionamento->cliente->minutoEntrada, estacionamento->cliente->horaSaida, estacionamento->cliente->minutoSaida);
+        printf("\tValor pago: R$ %.2f\n", estacionamento->tempoOcupado * VALOR_MINUTO);
         imprime(estacionamento->esquerda);
         imprime(estacionamento->direita);
 
@@ -480,7 +487,7 @@ Vaga* terminaDia(Vaga **estacionamento, Vaga **saida){
         terminaDia(&((*estacionamento)->direita), saida);
         *estacionamento = finalizaVaga(*estacionamento);
         //printf("numero = %d hora saida = %d minuto saida = %d\n", (*estacionamento)->numero, (*estacionamento)->cliente->horaSaida, (*estacionamento)->cliente->minutoSaida);
-        *saida = insereEstacionamento(*saida, criaVaga((*estacionamento)->numero, (*estacionamento)->classe, criaCliente((*estacionamento)->cliente->placa, (*estacionamento)->cliente->horaEntrada * 60 + (*estacionamento)->cliente->minutoEntrada, (*estacionamento)->cliente->horaSaida * 60 + (*estacionamento)->cliente->minutoSaida)));
+        *saida = insereEstacionamento(*saida, criaVaga((*estacionamento)->numero, (*estacionamento)->classe, (*estacionamento)->tempoOcupado, criaCliente((*estacionamento)->cliente->placa, (*estacionamento)->cliente->horaEntrada * 60 + (*estacionamento)->cliente->minutoEntrada, (*estacionamento)->cliente->horaSaida * 60 + (*estacionamento)->cliente->minutoSaida)));
         *estacionamento = removeVaga(estacionamento, *estacionamento);
 
     }
