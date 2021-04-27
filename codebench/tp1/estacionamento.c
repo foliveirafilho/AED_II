@@ -55,7 +55,7 @@ int qtdeVagasSaida(Vaga *estacionamento);
 int maior(int *vetor, int tamanho);
 int geraVaga();
 int geraTempo();
-char geraClasse();
+char geraClasse(int *qtdeVagasClasse);
 char *geraPlaca();
 
 int main(){
@@ -86,13 +86,13 @@ int main(){
                 vagaProcurada = buscaVaga(estacionamento, numero);
                 
                 if(vagaProcurada == NULL || (vagaProcurada != NULL && vagaProcurada->numero != numero)){
-                    estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(), 0, criaCliente(geraPlaca(), geraTempo(), 0)));
+                    estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(qtdeVagasClasse), 0, criaCliente(geraPlaca(), geraTempo(), 0)));
                 
                 }
                 
             }else{
                 ehRaiz = 0;
-                estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(), 0, criaCliente(geraPlaca(), geraTempo(), 0)));
+                estacionamento = insereEstacionamento(estacionamento, criaVaga(numero, geraClasse(qtdeVagasClasse), 0, criaCliente(geraPlaca(), geraTempo(), 0)));
                 
             }
 
@@ -114,16 +114,6 @@ int main(){
             }else if(vaga != -1){
                 vagaProcurada = buscaVagaRemocao(estacionamento, vaga);
                 vagaProcurada = finalizaVaga(vagaProcurada);
-
-                /*if(vagaProcurada != NULL){
-                    if(vaga == vagaProcurada->numero){
-                        printf("vaga encontrada = %d\n", vagaProcurada->numero);
-
-                    }else
-                        printf("vaga nao encontrada, removido a vaga %d que era a anterior\n", vagaProcurada->numero);
-            
-                }else
-                    printf("estacionamento vazio, nao foi possivel remover nenhuma vaga\n");*/
 
                 saida = insereEstacionamento(saida, criaVaga(vagaProcurada->numero, vagaProcurada->classe, vagaProcurada->tempoOcupado, criaCliente(vagaProcurada->cliente->placa, vagaProcurada->cliente->horaEntrada * 60 + vagaProcurada->cliente->minutoEntrada, vagaProcurada->cliente->horaSaida * 60 + vagaProcurada->cliente->minutoSaida)));
                 removeVaga(&estacionamento, vagaProcurada);
@@ -148,7 +138,7 @@ int main(){
         horaMaiorOcupacao(saida, ocupacaoHora);
         horaMaisOcupada = maior(ocupacaoHora, 24);
 
-        vagasPorClasse(saida, qtdeVagasClasse);
+        //vagasPorClasse(saida, qtdeVagasClasse);
 
         printf("\n---------------Relatorio--------------------------\n");
         printf("\nMedia de vagas ocupadas: %d\n", vagasSaida);
@@ -351,7 +341,6 @@ Vaga* finalizaVaga(Vaga* estacionamento){
         estacionamento->cliente->minutoSaida = saida % 60;
 
         estacionamento->tempoOcupado = saida - ((estacionamento->cliente->horaEntrada * 60) + estacionamento->cliente->minutoEntrada);
-        printf("tempoOcupado = %.2f\n", estacionamento->tempoOcupado);
 
     }
 
@@ -460,9 +449,9 @@ Vaga* rotacaoEsquerdaDireita(Vaga **estacionamento){
 void imprime(Vaga *estacionamento){
     if(estacionamento != NULL){
         printf("\nPlaca: %s\n", estacionamento->cliente->placa);
-        printf("\tPiso: %d Vaga: %d Classe = %c Numero = %d\n", estacionamento->numero / 128, estacionamento->numero % 128, estacionamento->classe, estacionamento->numero);
-        printf("\tEntrada: %dh %dmin Saida: %dh %dmin\n", estacionamento->cliente->horaEntrada, estacionamento->cliente->minutoEntrada, estacionamento->cliente->horaSaida, estacionamento->cliente->minutoSaida);
-        printf("\tValor pago: R$ %.2f\n", estacionamento->tempoOcupado * VALOR_MINUTO);
+        printf("     Piso: %d Vaga: %d Classe = %c Numero = %d\n", estacionamento->numero / 128, estacionamento->numero % 128, estacionamento->classe, estacionamento->numero);
+        printf("     Entrada: %dh %dmin Saida: %dh %dmin\n", estacionamento->cliente->horaEntrada, estacionamento->cliente->minutoEntrada, estacionamento->cliente->horaSaida, estacionamento->cliente->minutoSaida);
+        printf("     Valor pago: R$ %.2f\n", estacionamento->tempoOcupado * VALOR_MINUTO);
         imprime(estacionamento->esquerda);
         imprime(estacionamento->direita);
 
@@ -586,20 +575,49 @@ int geraTempo(){
 
 }
 
-char geraClasse(){
-    int classe = 1 + (rand() % 4);
+char geraClasse(int *qtdeVagasClasse){
+    int classe;
+    int limite;
+
+    do{
+        classe = 1 + (rand() % 4);
+
+        switch(classe){
+            case 1:
+                limite = 0.2 * MAX_VAGA; 
+                break;
+
+            case 2:
+                limite = 0.5 * MAX_VAGA; 
+                break;
+
+            case 3:
+                limite = 0.1 * MAX_VAGA; 
+                break;
+
+            case 4: 
+                limite = 0.2 * MAX_VAGA; 
+                break;
+
+        }
+
+    }while(qtdeVagasClasse[classe - 1] > limite);
 
     switch(classe){
         case 1:
+            qtdeVagasClasse[0]++;
             return 'A';
 
         case 2:
+            qtdeVagasClasse[1]++;
             return 'B';
 
         case 3:
+            qtdeVagasClasse[2]++;
             return 'C';
 
-        case 4: 
+        case 4:
+            qtdeVagasClasse[3]++;
             return 'D';
 
     }
