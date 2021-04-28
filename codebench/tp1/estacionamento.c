@@ -56,7 +56,7 @@ int maior(int *vetor, int tamanho);
 int geraVaga();
 int geraTempo();
 char geraClasse(int *qtdeVagasClasse);
-char *geraPlaca();
+char* geraPlaca();
 
 int main(){
     Vaga *estacionamento = criaEstacionamento(), *saida = criaEstacionamento(), *vagaProcurada;
@@ -101,8 +101,6 @@ int main(){
 
     }while((qtdeVagasOcupadas < MAX_VAGA) && (qtdeVagas != -1));
 
-    //imprime(estacionamento);
-
     if(qtdeVagasOcupadas > 0){
         do{
             printf("Vaga a ser removida (digite -1 para sair ou 0 para remover todas as vagas): ");
@@ -137,8 +135,6 @@ int main(){
 
         horaMaiorOcupacao(saida, ocupacaoHora);
         horaMaisOcupada = maior(ocupacaoHora, 24);
-
-        //vagasPorClasse(saida, qtdeVagasClasse);
 
         printf("\n---------------Relatorio--------------------------\n");
         printf("\nMedia de vagas ocupadas: %d\n", vagasSaida);
@@ -268,42 +264,39 @@ Vaga* removeVaga(Vaga** estacionamento, Vaga *vaga){
         }
 
     }else { /* achou o nó a remover */
-        /* nó sem filhos */
-        if ((*estacionamento)->esquerda == NULL && (*estacionamento)->direita == NULL) {
+        if ((*estacionamento)->esquerda == NULL && (*estacionamento)->direita == NULL) { /* nó sem filhos */
             free((*estacionamento)->cliente);
             free(*estacionamento);
             
             *estacionamento = NULL;
 
-        }
-        /* nó só tem filho à direita */
-        else if ((*estacionamento)->esquerda == NULL) {
+        }else if ((*estacionamento)->esquerda == NULL) { /* nó só tem filho à direita */
             Vaga* t = *estacionamento;
             estacionamento = &((*estacionamento)->direita);
             
             free(t->cliente);
             free(t);
 
-        }
-        /* só tem filho à esquerda */
-        else if ((*estacionamento)->direita == NULL) {
+        }else if ((*estacionamento)->direita == NULL) { /* só tem filho à esquerda */
             Vaga* t = *estacionamento;
             estacionamento = &((*estacionamento)->esquerda);
             
             free(t->cliente);
             free(t);
 
-        }
-        /* nó tem os dois filhos */
-        else {
+        }else { /* nó tem os dois filhos */
             Vaga* maiorDosMenores = (*estacionamento)->esquerda;
             
             while (maiorDosMenores->direita != NULL) {
                 maiorDosMenores = maiorDosMenores->direita;
             }
             
-            (*estacionamento)->numero = maiorDosMenores->numero; /* troca as informações */
+            /* troca as informações */
+            (*estacionamento)->numero = maiorDosMenores->numero; 
             (*estacionamento)->cliente = maiorDosMenores->cliente;
+            (*estacionamento)->classe = maiorDosMenores->classe;
+            (*estacionamento)->tempoOcupado = maiorDosMenores->tempoOcupado;
+
             maiorDosMenores->numero = vaga->numero;
 
             (*estacionamento)->esquerda = removeVaga(&((*estacionamento)->esquerda), vaga);
@@ -328,9 +321,6 @@ Vaga* removeVaga(Vaga** estacionamento, Vaga *vaga){
 Vaga* finalizaVaga(Vaga* estacionamento){
     if(estacionamento != NULL){
         int saida = geraTempo();
-
-        /*finalizaVaga(estacionamento->esquerda);
-        finalizaVaga(estacionamento->direita);*/
         
         while(saida <= ((estacionamento->cliente->horaEntrada * 60) + (estacionamento->cliente->minutoEntrada))){
             saida = geraTempo();
@@ -475,7 +465,6 @@ Vaga* terminaDia(Vaga **estacionamento, Vaga **saida){
         terminaDia(&((*estacionamento)->esquerda), saida);
         terminaDia(&((*estacionamento)->direita), saida);
         *estacionamento = finalizaVaga(*estacionamento);
-        //printf("numero = %d hora saida = %d minuto saida = %d\n", (*estacionamento)->numero, (*estacionamento)->cliente->horaSaida, (*estacionamento)->cliente->minutoSaida);
         *saida = insereEstacionamento(*saida, criaVaga((*estacionamento)->numero, (*estacionamento)->classe, (*estacionamento)->tempoOcupado, criaCliente((*estacionamento)->cliente->placa, (*estacionamento)->cliente->horaEntrada * 60 + (*estacionamento)->cliente->minutoEntrada, (*estacionamento)->cliente->horaSaida * 60 + (*estacionamento)->cliente->minutoSaida)));
         *estacionamento = removeVaga(estacionamento, *estacionamento);
 
@@ -561,9 +550,7 @@ int maior(int *vetor, int tamanho){
 }
 
 int geraVaga(){
-    int v = 1 + (rand() % MAX_VAGA);
-    //printf("vaga = %d\n", v);
-    return v;
+    return 1 + (rand() % MAX_VAGA);
 
 }
 
