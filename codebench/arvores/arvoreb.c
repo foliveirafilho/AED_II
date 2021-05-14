@@ -32,10 +32,11 @@ int main(){
     for(int i = 0; i < qtdeElementos; i++){
         scanf("%d", &chave);
         insere(&arvore, chave);
+        imprime(arvore);
 
     }
 
-    imprime(arvore);
+    // imprime(arvore);
 
     return 0;
 
@@ -88,12 +89,14 @@ No* insere(No **raiz, int chave){
 
     if(!chaveExiste(noParaInserir, chave)){
         if(noCheio(*raiz)){
+            printf("no cheio!\n");
             No *novaRaiz = criaNo();
 
-            novaRaiz->qtdeChaves = 1;
+            novaRaiz->qtdeChaves = 0;
             novaRaiz->nos[0] = *raiz;
 
-            divide(&novaRaiz, 0);
+            *raiz = divide(&novaRaiz, 0);
+            printf("divisao feita com sucesso\n");
             percorreInsere(&novaRaiz, chave);
 
         }else
@@ -101,6 +104,8 @@ No* insere(No **raiz, int chave){
 
     }else
         printf("Chave ja existe, nao eh possivel inserir!\n");
+
+    return *raiz;
 
 }
 
@@ -114,14 +119,20 @@ No* percorreInsere(No **arvore, int chave){
 
         }
 
-        (*arvore)->chaves[i + 1] = chave;
+        if(i <= 0)
+            (*arvore)->chaves[0] = chave;
+
+        else
+            (*arvore)->chaves[i] = chave;
+
         (*arvore)->qtdeChaves++;
 
     }else{
         while((i >= 0) && (chave < (*arvore)->chaves[i])) // encontra qual o filho deve ser percorrido
             i = i - 1;
 
-        i++;
+        if(i < 0)
+            i++;
 
         if(noCheio((*arvore)->nos[i])){ // verifica se o filho encontrado esta cheio
             divide(arvore, i);
@@ -134,13 +145,14 @@ No* percorreInsere(No **arvore, int chave){
 
     }
 
+    return *arvore;
+
 }
 
 No* divide(No **pai, int indiceFilho){
     No *no = criaNo();
 
     no->qtdeChaves = ORDEM - 1;
-    (*pai)->nos[indiceFilho]->qtdeChaves = ORDEM - 1;
 
     for(int i = 0; i < ORDEM - 1; i++)
         no->chaves[i] = (*pai)->nos[indiceFilho]->chaves[i + ORDEM];
@@ -150,6 +162,8 @@ No* divide(No **pai, int indiceFilho){
             no->nos[i] = (*pai)->nos[indiceFilho]->nos[i + ORDEM];
 
     }
+
+    (*pai)->nos[indiceFilho]->qtdeChaves = ORDEM - 1;
 
     for(int i = (*pai)->qtdeChaves + 1; i > indiceFilho + 1; i--)
         (*pai)->nos[i + 1] = (*pai)->nos[i]; //shift nos filhos
