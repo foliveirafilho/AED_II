@@ -14,11 +14,28 @@ struct no{
 No *criaNo();
 No* criaArvore();
 No* buscaChave(No *arvore, int chave);
+No* insere(No **raiz, int chave);
+No* percorreInsere(No **arvore, int chave);
 No* divide(No **pai, int indiceFilho);
+void imprime(No *arvore);
+int chaveExiste(No *no, int chave);
 int ehFolha(No *no);
+int noCheio(No *no);
 
 int main(){
+    No *arvore = criaArvore();
+    int chave;
+    int qtdeElementos;
 
+    scanf("%d", &qtdeElementos);
+
+    for(int i = 0; i < qtdeElementos; i++){
+        scanf("%d", &chave);
+        insere(&arvore, chave);
+
+    }
+
+    imprime(arvore);
 
     return 0;
 
@@ -66,6 +83,59 @@ No* buscaChave(No *arvore, int chave){
 
 }
 
+No* insere(No **raiz, int chave){
+    No *noParaInserir = buscaChave(*raiz, chave);
+
+    if(!chaveExiste(noParaInserir, chave)){
+        if(noCheio(*raiz)){
+            No *novaRaiz = criaNo();
+
+            novaRaiz->qtdeChaves = 1;
+            novaRaiz->nos[0] = *raiz;
+
+            divide(&novaRaiz, 0);
+            percorreInsere(&novaRaiz, chave);
+
+        }else
+            percorreInsere(raiz, chave);
+
+    }else
+        printf("Chave ja existe, nao eh possivel inserir!\n");
+
+}
+
+No* percorreInsere(No **arvore, int chave){
+    int i = (*arvore)->qtdeChaves;
+
+    if(ehFolha(*arvore)){ // encontrou a folha a inserir
+        while((i >= 0) && (chave < (*arvore)->chaves[i])){ // encontra a posicao onde se deve inserir a chave
+            (*arvore)->chaves[i + 1] = (*arvore)->chaves[i];
+            i--;
+
+        }
+
+        (*arvore)->chaves[i + 1] = chave;
+        (*arvore)->qtdeChaves++;
+
+    }else{
+        while((i >= 0) && (chave < (*arvore)->chaves[i])) // encontra qual o filho deve ser percorrido
+            i = i - 1;
+
+        i++;
+
+        if(noCheio((*arvore)->nos[i])){ // verifica se o filho encontrado esta cheio
+            divide(arvore, i);
+            if(chave > (*arvore)->chaves[i])
+                i++;
+
+        }
+
+        percorreInsere(&((*arvore)->nos[i]), chave);
+
+    }
+
+}
+
 No* divide(No **pai, int indiceFilho){
     No *no = criaNo();
 
@@ -96,6 +166,35 @@ No* divide(No **pai, int indiceFilho){
 
 }
 
+void imprime(No *arvore){
+    if(arvore != NULL){
+        for(int i = 0; i < arvore->qtdeChaves; i++)
+            printf("| %d ", arvore->chaves[i]);
+
+        printf("|\n");
+
+        for(int i = 0; i < arvore->qtdeChaves + 1; i++)
+            imprime(arvore->nos[i]);
+
+    }
+
+}
+
+int chaveExiste(No *no, int chave){
+    int i = 0;
+    
+    while(i < no->qtdeChaves){
+        if(no->chaves[i] == chave)
+            return 1;
+
+        i++;
+
+    }
+
+    return 0;
+
+}
+
 int ehFolha(No *no){
     int i = 0;
 
@@ -108,5 +207,13 @@ int ehFolha(No *no){
     }
 
     return 1;
+
+}
+
+int noCheio(No *no){
+    if(no->qtdeChaves == (2 * ORDEM) - 1)
+        return 1;
+
+    return 0;
 
 }
