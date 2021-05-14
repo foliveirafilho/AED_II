@@ -17,6 +17,7 @@ No* buscaChave(No *arvore, int chave);
 No* insere(No **raiz, int chave);
 No* percorreInsere(No **arvore, int chave);
 No* divide(No **pai, int indiceFilho);
+No* exclui(No **arvore, int chave);
 void imprime(No *arvore);
 int chaveExiste(No *no, int chave);
 int ehFolha(No *no);
@@ -191,6 +192,11 @@ void imprime(No *arvore){
             imprime(arvore->nos[i]);
 
     }
+
+}
+
+No* exclui(No **arvore, int chave){
+    
 
 }
 
