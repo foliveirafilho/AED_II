@@ -17,8 +17,9 @@ No* buscaChave(No *arvore, int chave);
 No* insere(No **raiz, int chave);
 No* percorreInsere(No **arvore, int chave);
 No* divide(No **pai, int indiceFilho);
-No* exclui(No **arvore, int chave);
+No* remove(No **arvore, int chave);
 void imprime(No *arvore);
+void liberaArvore(No *arvore);
 int chaveExiste(No *no, int chave);
 int ehFolha(No *no);
 int noCheio(No *no);
@@ -28,11 +29,22 @@ int main(){
     int chave;
     int qtdeElementos;
 
+    printf("Quantidade de elementos a serem inseridos: ");
     scanf("%d", &qtdeElementos);
 
     for(int i = 0; i < qtdeElementos; i++){
         scanf("%d", &chave);
         insere(&arvore, chave);
+        imprime(arvore);
+
+    }
+
+    printf("Quantidade de elementos a serem removidos: ");
+    scanf("%d", &qtdeElementos);
+
+    for(int i = 0; i < qtdeElementos; i++){
+        scanf("%d", &chave);
+        remove(&arvore, chave);
         imprime(arvore);
 
     }
@@ -195,7 +207,19 @@ void imprime(No *arvore){
 
 }
 
-No* exclui(No **arvore, int chave){
+void liberaArvore(No *arvore){
+    if(arvore != NULL){
+        for(int i = 0; i < arvore->qtdeChaves; i++)
+            liberaArvore(arvore);
+
+        liberaArvore(arvore);
+
+
+    }
+
+}
+
+No* remove(No **arvore, int chave){
     
 
 }
