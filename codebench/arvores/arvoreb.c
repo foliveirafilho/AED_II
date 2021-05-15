@@ -17,9 +17,11 @@ No* buscaChave(No *arvore, int chave);
 No* insere(No **raiz, int chave);
 No* percorreInsere(No **arvore, int chave);
 No* divide(No **pai, int indiceFilho);
-No* remove(No **arvore, int chave);
+No* elimina(No **arvore, int chave);
 No* percorreRemove(No **arvore, int chave);
-No *junta(No **pai, int indiceFilhoChave, int indiceIrmao);
+No* junta(No **pai, int indiceFilhoChave, int indiceIrmao);
+No* removeChave(No **no, int chave);
+No* insereChave(No **no, int chave);
 void imprime(No *arvore);
 void liberaArvore(No *arvore);
 int chaveExisteNo(No *no, int chave);
@@ -46,7 +48,7 @@ int main(){
 
     for(int i = 0; i < qtdeElementos; i++){
         scanf("%d", &chave);
-        remove(&arvore, chave);
+        elimina(&arvore, chave);
         imprime(arvore);
 
     }
@@ -102,7 +104,7 @@ No* buscaChave(No *arvore, int chave){
 No* insere(No **raiz, int chave){
     No *noParaInserir = buscaChave(*raiz, chave);
 
-    if(!chaveExisteNo(noParaInserir, chave)){
+    if(chaveExisteNo(noParaInserir, chave) == -1){
         if(noCheio(*raiz)){
             printf("no cheio!\n");
             No *novaRaiz = criaNo();
@@ -221,7 +223,7 @@ void liberaArvore(No *arvore){
 
 }
 
-No* remove(No **arvore, int chave){
+No* elimina(No **arvore, int chave){
     if(chaveExisteNo(*arvore, chave)){
         if(ehFolha(*arvore)){
             //elimina a chave
@@ -252,26 +254,77 @@ No* percorreRemove(No **arvore, int chave){
 }
 
 No *junta(No **pai, int indiceFilhoChave, int indiceIrmao){
-    //elimina chave de (*pai)->nos[indiceFilhoChave]
     //transfere chave do pai que separa os irmaos para (*pai)->nos[indiceIrmao]
-    //transfere as chaves restantes de (*pai)->nos[indiceFilhoChave] para (*pai)->nos[indiceIrmao]
-    //free((*pai)->nos[indiceFilhoChave])
+    int indiceChavePai = indiceFilhoChave > indiceIrmao ? indiceFilhoChave : indiceIrmao;
 
+    insereChave(&((*pai)->nos[indiceIrmao]), (*pai)->chaves[indiceChavePai]);
+    removeChave(pai, (*pai)->chaves[indiceChavePai]);
+
+    //transfere as chaves restantes de (*pai)->nos[indiceFilhoChave] para (*pai)->nos[indiceIrmao]
+    int i = 0;
+    while((*pai)->nos[indiceFilhoChave]->qtdeChaves > 0){
+        insereChave(&((*pai)->nos[indiceIrmao]), (*pai)->nos[indiceFilhoChave]->chaves[i]);
+        removeChave(&((*pai)->nos[indiceFilhoChave]), (*pai)->nos[indiceFilhoChave]->chaves[i]);
+
+        i++;
+
+    }
+    
+    //libera o filho que continha a chave a ser removida
+    free((*pai)->nos[indiceFilhoChave]);
+
+
+}
+
+No* removeChave(No **no, int chave){
+    int indiceChave = chaveExisteNo(*no, chave);
+    int aux;
+
+    for(int i = indiceChave; i < (*no)->qtdeChaves - 1; i++){
+        aux = (*no)->chaves[i + 1];
+        (*no)->chaves[i] = aux;
+    
+    }
+
+    (*no)->qtdeChaves--;
+
+    return *no;
+
+}
+
+No* insereChave(No **no, int chave){
+    int i = (*no)->qtdeChaves;
+
+    while((i >= 0) && (chave < (*no)->chaves[i])){ // encontra a posicao onde se deve inserir a chave
+        (*no)->chaves[i + 1] = (*no)->chaves[i];
+        i--;
+
+    }
+
+    if(i <= 0)
+        (*no)->chaves[0] = chave;
+
+    else
+        (*no)->chaves[i] = chave;
+
+    (*no)->qtdeChaves++;
+
+    return *no;
 
 }
 
 int chaveExisteNo(No *no, int chave){
     int i = 0;
-    
+
     while(i < no->qtdeChaves){
         if(no->chaves[i] == chave)
-            return 1;
+            return i;
 
         i++;
 
     }
 
-    return 0;
+    return -1;
 
 }
 
