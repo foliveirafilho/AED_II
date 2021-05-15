@@ -18,9 +18,11 @@ No* insere(No **raiz, int chave);
 No* percorreInsere(No **arvore, int chave);
 No* divide(No **pai, int indiceFilho);
 No* remove(No **arvore, int chave);
+No* percorreRemove(No **arvore, int chave);
+No *junta(No **pai, int indiceFilhoChave, int indiceIrmao);
 void imprime(No *arvore);
 void liberaArvore(No *arvore);
-int chaveExiste(No *no, int chave);
+int chaveExisteNo(No *no, int chave);
 int ehFolha(No *no);
 int noCheio(No *no);
 
@@ -100,7 +102,7 @@ No* buscaChave(No *arvore, int chave){
 No* insere(No **raiz, int chave){
     No *noParaInserir = buscaChave(*raiz, chave);
 
-    if(!chaveExiste(noParaInserir, chave)){
+    if(!chaveExisteNo(noParaInserir, chave)){
         if(noCheio(*raiz)){
             printf("no cheio!\n");
             No *novaRaiz = criaNo();
@@ -220,11 +222,45 @@ void liberaArvore(No *arvore){
 }
 
 No* remove(No **arvore, int chave){
-    
+    if(chaveExisteNo(*arvore, chave)){
+        if(ehFolha(*arvore)){
+            //elimina a chave
+
+        }else{
+            //se o irmao esquerdo possui qtdeChaves >= ORDEM (quer dizer se retirar nao vai ferir a logica da arvore)
+                //troca a chave a ser removida pelo Maior Dos Menores e remove recursivamente a chave que agora esta na folha
+
+            //se nao, se o irmao direito possui qtdeChaves >= ORDEM (quer dizer se retirar nao vai ferir a logica da arvore)
+                //troca a chave a ser removida pelo Menor Dos Maiores e remove recursivamente a chave que agora esta na folha
+
+            //se nao, quer dizer que ambos os irmaos possuem exatamente o valor minimo de chaves (quer dizer que se retirar vai ferir a logica da arvore)
+                //junta(pai, indiceFilho, indiceIrmao)
+
+        }
+
+
+    }
 
 }
 
-int chaveExiste(No *no, int chave){
+No* percorreRemove(No **arvore, int chave){
+    //se a chave nao estiver no no atual, encontrar qual o filho a ser percorrido
+        //se o filho a percorrer tiver o numero minimo de chaves (qtdeChaves == ORDEM - 1)
+            //se um dos irmaos puder emprestar uma chave ao no a ser percorrido, desce a chave do pai que divide os dois e sobe a menor chave do irmao para o pai
+            //se nao puder emprestar, faz a juncao do filho a ser percorrido com um dos irmaos
+
+}
+
+No *junta(No **pai, int indiceFilhoChave, int indiceIrmao){
+    //elimina chave de (*pai)->nos[indiceFilhoChave]
+    //transfere chave do pai que separa os irmaos para (*pai)->nos[indiceIrmao]
+    //transfere as chaves restantes de (*pai)->nos[indiceFilhoChave] para (*pai)->nos[indiceIrmao]
+    //free((*pai)->nos[indiceFilhoChave])
+
+
+}
+
+int chaveExisteNo(No *no, int chave){
     int i = 0;
     
     while(i < no->qtdeChaves){
