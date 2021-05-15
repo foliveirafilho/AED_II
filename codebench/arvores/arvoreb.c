@@ -22,6 +22,7 @@ No* percorreRemove(No **arvore, int chave);
 No* junta(No **pai, int indiceFilhoChave, int indiceIrmao);
 No* removeChave(No **no, int chave);
 No* insereChave(No **no, int chave);
+int filhoAPercorrer(No *no, int chave);
 void imprime(No *arvore);
 void liberaArvore(No *arvore);
 int chaveExisteNo(No *no, int chave);
@@ -127,29 +128,11 @@ No* insere(No **raiz, int chave){
 }
 
 No* percorreInsere(No **arvore, int chave){
-    int i = (*arvore)->qtdeChaves;
-
     if(ehFolha(*arvore)){ // encontrou a folha a inserir
-        while((i >= 0) && (chave < (*arvore)->chaves[i])){ // encontra a posicao onde se deve inserir a chave
-            (*arvore)->chaves[i + 1] = (*arvore)->chaves[i];
-            i--;
-
-        }
-
-        if(i <= 0)
-            (*arvore)->chaves[0] = chave;
-
-        else
-            (*arvore)->chaves[i] = chave;
-
-        (*arvore)->qtdeChaves++;
+        insereChave(arvore, chave);
 
     }else{
-        while((i >= 0) && (chave < (*arvore)->chaves[i])) // encontra qual o filho deve ser percorrido
-            i = i - 1;
-
-        if(i < 0)
-            i++;
+        int i = filhoAPercorrer(*arvore, chave);
 
         if(noCheio((*arvore)->nos[i])){ // verifica se o filho encontrado esta cheio
             divide(arvore, i);
@@ -227,6 +210,7 @@ No* elimina(No **arvore, int chave){
     if(chaveExisteNo(*arvore, chave)){
         if(ehFolha(*arvore)){
             //elimina a chave
+            removeChave(arvore, chave);
 
         }else{
             //se o irmao esquerdo possui qtdeChaves >= ORDEM (quer dizer se retirar nao vai ferir a logica da arvore)
@@ -239,7 +223,6 @@ No* elimina(No **arvore, int chave){
                 //junta(pai, indiceFilho, indiceIrmao)
 
         }
-
 
     }
 
@@ -269,7 +252,7 @@ No *junta(No **pai, int indiceFilhoChave, int indiceIrmao){
         i++;
 
     }
-    
+
     //libera o filho que continha a chave a ser removida
     free((*pai)->nos[indiceFilhoChave]);
 
@@ -310,6 +293,19 @@ No* insereChave(No **no, int chave){
     (*no)->qtdeChaves++;
 
     return *no;
+
+}
+
+int filhoAPercorrer(No *no, int chave){
+    int i = no->qtdeChaves;
+
+    while((i >= 0) && (chave < no->chaves[i])) // encontra qual o filho deve ser percorrido
+        i--;
+
+    if(i < 0)
+        i++;
+
+    return i;
 
 }
 
