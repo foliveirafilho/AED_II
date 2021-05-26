@@ -329,10 +329,12 @@ No* junta(No **pai, int indiceFilhoChave, int indiceIrmao){
     insereChave(&((*pai)->nos[indiceIrmao]), (*pai)->chaves[indiceChavePai]);
     
     //transfere as chaves restantes de (*pai)->nos[indiceFilhoChave] para (*pai)->nos[indiceIrmao]
+    int i = 0;
     qtdeChavesRestantes = (*pai)->nos[indiceFilhoChave]->qtdeChaves;
     while(qtdeChavesRestantes > 0){
-        insereChave(&((*pai)->nos[indiceIrmao]), (*pai)->nos[indiceFilhoChave]->chaves[0]);
+        insereChave(&((*pai)->nos[indiceIrmao]), (*pai)->nos[indiceFilhoChave]->chaves[i]);
         
+        i++;
         qtdeChavesRestantes--;
         
     }
@@ -340,10 +342,12 @@ No* junta(No **pai, int indiceFilhoChave, int indiceIrmao){
     for(int i = 0; i <= (*pai)->nos[indiceFilhoChave]->qtdeChaves; i++)
         insereNo(&((*pai)->nos[indiceIrmao]), (*pai)->nos[indiceFilhoChave]->nos[i]);
 
+    i = 0;
     qtdeChavesRestantes = (*pai)->nos[indiceFilhoChave]->qtdeChaves;
     while(qtdeChavesRestantes > 0){
-        removeChave(&((*pai)->nos[indiceFilhoChave]), (*pai)->nos[indiceFilhoChave]->chaves[0]);
+        removeChave(&((*pai)->nos[indiceFilhoChave]), (*pai)->nos[indiceFilhoChave]->chaves[i]);
         
+        i++;
         qtdeChavesRestantes--;
         
     }
